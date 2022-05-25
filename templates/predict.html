@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block main %}
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Prediction Results</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h5>Prediction Input:</h5>
+                <div>Mass^2: <span id="mm"></span></div>
+                <div>Mass Zeta-potential: <span id="mz"></span></div>
+                <div>Mass Concentration: <span id="mc"></span></div>
+                <div>Mass eV: <span id="me"></span></div>
+                <div>Concentration^2: <span id="cc"></span></div>
+                <div>Zeta-potential^2: <span id="zz"></span></div>
+                <div>Zeta-potential Concentration: <span id="zc"></span></div>
+                <div>Concentration Toxicity: <span id="ct"></span></div>
+                <div>Zeta-potential Toxicity: <span id="zt"></span></div>
+                <div>Mass: <span id="ma"></span></div>
+                <div>Energy Source: <span id="es"></span></div>
+                <div>shape_Janus: <span id="sj"></span></div>
+                <div>Concentration eV: <span id="ce"></span></div>
+                <div>Toxicity: <span id="to"></span></div>
+                <h5 class="pt-3">Prediction bioapplicable:</h5>
+                <div id="prediction"></div>
+                <h7 class="pt-3">Key: 1-Yes, it is bioapplicable, 0-No, it is not bioapplicable:</h7>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <a class="btn btn-primary" href="/results" role="button">View DB</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pt-5">
+    <div class="row justify-content-md-center">
+        <div class="col-md-4">
+            <h1>Evaluation of bio-applicability of nanorobot</h1>
+            <form action="" id="post-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="mass_2">Mass^2</label>
+                    <input type="number" step="any" class="form-control" id="mass_2" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="mass_zeta_potential">Mass Zeta-potential</label>
+                    <input type="number" step="any" class="form-control" id="mass_zeta_potential" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="mass_concentration">Mass Concentration</label>
+                    <input type="number" step="any" class="form-control" id="mass_concentration" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="mass_ev">Mass eV</label>
+                    <input type="number" step="any" class="form-control" id="mass_ev" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="concentration_2">Concentration^2</label>
+                    <input type="number" step="any" class="form-control" id="concentration_2" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="zeta_potential_2">Zeta-potential^2</label>
+                    <input type="number" step="any" class="form-control" id="zeta_potential_2" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="zeta_potential_concentration">Zeta-potential Concentration</label>
+                    <input type="number" step="any" class="form-control" id="zeta_potential_concentration" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="concentration_toxicity">Concentration Toxicity</label>
+                    <input type="number" step="any" class="form-control" id="concentration_toxicity" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="zeta_potential_toxicity">Zeta-potential Toxicity</label>
+                    <input type="number" step="any" class="form-control" id="zeta_potential_toxicity" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="mass">Mass</label>
+                    <input type="number" step="any" class="form-control" id="mass" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="energy_source">Energy Source</label>
+                    <input type="number" step="any" class="form-control" id="energy_source" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="shape_Janus">Shape Janus</label>
+                    <input type="number" step="any" class="form-control" id="shape_Janus" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="concentration_ev">Concentration eV</label>
+                    <input type="number" step="any" class="form-control" id="concentration_ev" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="toxicity">Toxicity</label>
+                    <input type="number" step="any" class="form-control" id="toxicity" placeholder="" required>
+                </div>
+                <button type="submit" value="Submit" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on('submit', '#post-form',function(e){
+        e.preventDefault();
+        $.ajax({
+            type:'POST',
+            url:'{% url "predict:submit_prediction" %}',
+            data:{
+                mass_2:$('#mass_2').val(),
+                mass_zeta_potential:$('#mass_zeta_potential').val(),
+                mass_concentration:$('#mass_concentration').val(),
+                mass_ev:$('#mass_ev').val(),
+                concentration_2:$('#concentration_2').val(),
+                zeta_potential_2:$('#zeta_potential_2').val(),
+                zeta_potential_concentration:$('#zeta_potential_concentration').val(),
+                concentration_toxicity:$('#concentration_toxicity').val(),
+                zeta_potential_toxicity:$('#zeta_potential_toxicity').val(),
+                mass:$('#mass').val(),
+                energy_source:$('#energy_source').val(),
+                shape_Janus:$('#shape_Janus').val(),
+                concentration_ev:$('#concentration_ev').val(),
+                toxicity:$('#toxicity').val(),
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                action: 'post'
+            },
+            success:function(json) {
+                document.forms["post-form"].reset();
+                document.getElementById("prediction").innerHTML = json['result']
+                document.getElementById("mm").innerHTML = json['mass_2']
+                document.getElementById("mz").innerHTML = json['mass_zeta_potential']
+                document.getElementById("mc").innerHTML = json['mass_concentration']
+                document.getElementById("me").innerHTML = json['mass_ev']
+                document.getElementById("cc").innerHTML = json['concentration^2']
+                document.getElementById("zz").innerHTML = json['zeta_porential_2']
+                document.getElementById("zc").innerHTML = json['zeta_potential_concentration']
+                document.getElementById("ct").innerHTML = json['concentration_toxicity']
+                document.getElementById("zt").innerHTML = json['zeta_potential_toxicity']
+                document.getElementById("ma").innerHTML = json['mass']
+                document.getElementById("es").innerHTML = json['energy_source']
+                document.getElementById("sj").innerHTML = json['shape_Janus']
+                document.getElementById("ce").innerHTML = json['concentration_ev']
+                document.getElementById("to").innerHTML = json['toxicity']
+            },
+            error : function(xhr,errmsg,err) {
+
+            }
+        });
+    })
+</script>
+
+{% endblock %}
+
